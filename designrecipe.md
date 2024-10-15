@@ -1,95 +1,96 @@
 ## 1. Extract nouns from the user stories or specification
 
 ```
-As a coach
-So I can get to know all students
-I want to see a list of students' names.
+As a social network user,
+So I can have my information registered,
+I'd like to have a user account with my email address.
+User > Account > email
 
-As a coach
-So I can get to know all students
-I want to see a list of cohorts' names.
+As a social network user,
+So I can have my information registered,
+I'd like to have a user account with my username.
+User > Account > user_name
 
-As a coach
-So I can get to know all students
-I want to see a list of cohorts' starting dates.
+As a social network user,
+So I can write on my timeline,
+I'd like to create posts associated with my user account.
+User > Posts > account_id
 
-As a coach
-So I can get to know all students
-I want to see a list of students' cohorts.
+As a social network user,
+So I can write on my timeline,
+I'd like each of my posts to have a title and a content.
+User > Posts > title
+User > Posts > content
+
+As a social network user,
+So I can know who reads my posts,
+I'd like each of my posts to have a number of views.
+User > Posts > views
+
 ```
 
 ```
 Nouns:
 
-students, full_name, cohort_id, cohort_name, start_date
+Accounts, email, user_name, Posts, title, content, views, account_id
 ```
 
 ## 2. Infer the Table Name and Columns
 
 Put the different nouns in this table. Replace the example with your own nouns.
 
-| Record                  | Properties                 |
-| ---------------------   | ------------------         |
-| cohorts                 | cohort_name, starting_date |
-| students                | full_name, cohort_id       |
+| Record                  | Properties                        |
+| ---------------------   | ------------------                |
+| Accounts                | email, user_name                  |
+| Posts                   | title, content, views, account_id |
 
 
-1. Name of the first table (always plural): `cohorts` 
+1. Name of the first table (always plural): `Accounts` 
 
-    Column names: `cohort_name`, `starting_date`
+    Column names: `email`, `user_name`
 
-2. Name of the second table (always plural): `students` 
+2. Name of the second table (always plural): `Posts` 
 
-    Column names: `full_name`, `cohort_id`
+    Column names: `title`, `content`, `views`, `account_id`
 
 ## 3. Decide the column types
 ```
 # EXAMPLE:
 
-Table: cohorts
+Table: Accounts
 id: SERIAL
-cohort_name: text
-starting_date: int
+email: varchar(250)
+user_name: varchar(250)
 
-Table: students
+Table: Posts
 id: SERIAL
-full_name: text
-cohort_id: foreign key
+title: varchar(250)
+content: text
+views: int
+account_id: int
 ```
 
 ## 4. Decide on The Tables Relationship
 
-Most of the time, you'll be using a **one-to-many** relationship, and will need a **foreign key** on one of the two tables.
-
-To decide on which one, answer these two questions:
-
-1. Can one [TABLE ONE] have many [TABLE TWO]? (no)
-2. Can one [TABLE TWO] have many [TABLE ONE]? (Yes)
-
 You'll then be able to say that:
 
-1. **[students] has many [cohorts]**
-2. And on the other side, **[cohorts] belongs to [students]**
-3. In that case, the foreign key is in the table [students]
+1. **[Accounts] has many [Posts]**
+2. And on the other side, **[Posts] belongs to [Accounts]**
+3. In that case, the foreign key is in the table [Posts]
 
-Replace the relevant bits in this example with your own:
 
 ```
 # EXAMPLE
 
-1. Can one cohort have many students? YES
-2. Can one student have many cohorts? NO
+1. Can one Account have many Posts? YES
+2. Can one Post have many Accounts? NO
 
 -> Therefore,
--> A cohort HAS MANY students
--> A student BELONGS TO a cohort
+-> An Account HAS MANY Posts
+-> A Post BELONGS TO an Account
 
--> Therefore, the foreign key is on the cohorts table.
-Except that makes no sense with foreign keys because 1 cohort cannot have multiple foreign keys for multiple students, 1 student would have a single cohort foreign key
+-> Therefore, the foreign key is on the Posts table.
 ```
-
-*If you can answer YES to the two questions, you'll probably have to implement a Many-to-Many relationship, which is more complex and needs a third table (called a join table).*
-
 ## 5. Write the SQL
 
 ```sql
@@ -97,20 +98,22 @@ Except that makes no sense with foreign keys because 1 cohort cannot have multip
 -- file: students_table.sql
 
 -- Create the table without the foreign key first.
-CREATE TABLE cohorts (
+CREATE TABLE accounts (
   id SERIAL PRIMARY KEY,
-  cohort_name VARCHAR(250),
-  starting_date int
+  email VARCHAR(250),
+  user_name VARCHAR(250)
 );
 
 -- Then the table with the foreign key second.
-CREATE TABLE students (
+CREATE TABLE posts (
   id SERIAL PRIMARY KEY,
-  full_name VARCHAR(250),
+  title VARCHAR(250),
+  content TEXT,
+  views INT,
 -- The foreign key name is always {other_table_singular}_id
-  cohort_id int,
-  constraint fk_cohort foreign key(cohort_id)
-    references cohorts(id)
+  account_id int,
+  constraint fk_account_id foreign key(account_id)
+    references accounts(id)
 );
 
 ```
@@ -118,5 +121,5 @@ CREATE TABLE students (
 ## 6. Create the tables
 
 ```bash
-psql -h 127.0.0.1 student_directory_2 < students_table_2.sql
+psql -h 127.0.0.1 social_network < ssocial_network.sql
 ```
